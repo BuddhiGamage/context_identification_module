@@ -1,8 +1,9 @@
-pyaudio
-numpy
-tensorflow
-tf-keras
-librosa
+pyaudio==0.2.14
+numpy==1.26.4
+tensorflow==2.17.0
+tf-keras==2.17.0
+transformers==4.45.1
+librosa==0.10.2.post1
 openai==0.28
 python-dotenv
-qi
+qi==3.1.5
