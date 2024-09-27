@@ -10,16 +10,24 @@ from transformers import pipeline
 import joblib
 from tensorflow.keras.models import load_model
 
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 # Load a pre-trained model for sentiment analysis
 nlp = pipeline("sentiment-analysis")
-openai.api_key = 'key'  
+openai.api_key =  os.getenv('OPENAI_API_KEY') 
 
 # Load the CNN model for ambient sound detection
-model = load_model(r"C:\Users\s448160\OneDrive - University of Canberra - STAFF\PhD\Studies\HRI\CIMFSMS\3 Classes\Ambient Sound\emergency_model.h5")
+# model = load_model(r"C:\Users\s448160\OneDrive - University of Canberra - STAFF\PhD\Studies\HRI\CIMFSMS\3 Classes\Ambient Sound\emergency_model.h5")
+model = load_model(r"emergency_model.h5")
 input_shape = model.input_shape[1:]  # Exclude the batch dimension
 
 # Load the Naive Bayes model for final emergency classification
-nb_model = joblib.load(r"C:\Users\s448160\OneDrive - University of Canberra - STAFF\PhD\Studies\HRI\CIMFSMS\3 Classes\NB\NB_model.joblib")
+# nb_model = joblib.load(r"C:\Users\s448160\OneDrive - University of Canberra - STAFF\PhD\Studies\HRI\CIMFSMS\3 Classes\NB\NB_model.joblib")
+nb_model = joblib.load(r"NB_model.joblib")
 
 # Function to extract MFCCs from real-time audio for ambient sound classification
 def preprocess_audio(audio, sr, n_mfcc=40, n_fft=2048, hop_length=512, fixed_length=200):
