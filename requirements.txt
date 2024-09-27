@@ -1,0 +1,8 @@
+pyaudio
+numpy
+tensorflow
+tf-keras
+librosa
+openai==0.28
+python-dotenv
+qi
