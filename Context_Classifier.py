@@ -9,23 +9,42 @@ import re
 from transformers import pipeline
 import joblib
 from tensorflow.keras.models import load_model
+from connection import Connection
+import qi
+from playsound import playsound
+import os
+
+#creating the connection
+pepper = Connection()
+session = pepper.connect('10.0.0.244', '9559')
+
+# Create a proxy to the AL services
+behavior_mng_service = session.service("ALBehaviorManager")
+tts_service = session.service("ALTextToSpeech")
 
 # Load a pre-trained model for sentiment analysis
 nlp = pipeline("sentiment-analysis")
-openai.api_key = 'key'  
+  
 
 # Load the CNN model for ambient sound detection
-model = load_model(r"C:\Users\s448160\OneDrive - University of Canberra - STAFF\PhD\Studies\HRI\CIMFSMS\3 Classes\Ambient Sound\emergency_model.h5")
+model = load_model(r"/home/nipuni/pepper/context_identification_module/emergency_model.h5")
 input_shape = model.input_shape[1:]  # Exclude the batch dimension
 
 # Load the Naive Bayes model for final emergency classification
-nb_model = joblib.load(r"C:\Users\s448160\OneDrive - University of Canberra - STAFF\PhD\Studies\HRI\CIMFSMS\3 Classes\NB\NB_model.joblib")
+nb_model = joblib.load(r"/home/nipuni/pepper/context_identification_module/NB_model.joblib")
 
+# Play an animation
+def animation(state,prompt):
+
+    behavior_mng_service .stopAllBehaviors()
+#    behavior_mng_service .startBehavior("pkg/"+state)
+    tts_service.say(prompt)
+    
 # Function to extract MFCCs from real-time audio for ambient sound classification
 def preprocess_audio(audio, sr, n_mfcc=40, n_fft=2048, hop_length=512, fixed_length=200):
     mfccs = librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=n_mfcc, n_fft=n_fft, hop_length=hop_length)
     
-    # Pad or truncate the MFCC features to fixed_length
+    # Pad or truncaipte the MFCC features to fixed_length
     if mfccs.shape[1] < fixed_length:
         pad_width = fixed_length - mfccs.shape[1]
         mfccs = np.pad(mfccs, pad_width=((0, 0), (0, pad_width)), mode='constant')
@@ -148,16 +167,22 @@ def classify_context(ambient_confidence, keyword_confidence, sentiment_confidenc
     prob = class_probs[combined_class]
     if context_label == 'Disengaged' and 0.8 < prob < 1:
         final_label = 'Disengaged'
+        animation(0,"Disengaged")
     elif context_label == 'Disengaged' and 0 < prob < 0.7:
         final_label = 'Passive'
+        animation(0,"Passive")
     elif context_label == 'Social' and 0.8 < prob < 1:
         final_label = 'Social'
+        animation(0,"Social")
     elif context_label == 'Social' and 0 < prob < 0.7:
         final_label = 'Passive'
+        animation(0,"Passive")
     elif context_label == 'Alert' and 0.8 < prob < 1:
         final_label = 'Alarmed'
+        animation(0,"Alarmed")
     elif context_label == 'Alert' and 0 < prob < 0.7:
         final_label = 'Alert'
+        animation(0,"Alert")
     
     return context_label, final_label
 
